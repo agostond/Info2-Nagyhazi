@@ -4,10 +4,19 @@ $joinsql = getDb();
 ?>
 <html>
     <body>
+        <br>
+        --------------------
         <?php $showTlist = false; $editTeam = false; ?>
 
             <form  method = "post">
-                <input type = "submit" name = "tshow" value = "Csapatok mutatása" class="button button2"/>
+                <?php 
+                    if(!isset($_POST['tns'])){
+                        $_POST['tns'] = "";
+                    } 
+                ?>
+                <input type="search" name="tns" value = "<?=$_POST['tns']?>" placeholder="Csapat nevére"/>
+                <input type="submit" name = "t_search" value="Keres" class="button button2"/>
+                <input type = "submit" name = "tshow" value = "Összes csapat mutatása" class="button button2"/>
                 Szeretne adatokat szerkeszteni?
                 <input type="radio" id ="igen" name="tedit" value= 1>
                 <label for="igen">Igen</label>
@@ -15,7 +24,7 @@ $joinsql = getDb();
                 <label for="nem">Nem</label>
             </form>
             <?php 
-                if (isset($_POST['tshow'])) {
+                if (isset($_POST['tshow']) || isset($_POST['t_search'])) {
                     $showTlist = true;
                     $editTeam = $_POST['tedit'];
                 } 
@@ -27,7 +36,10 @@ $joinsql = getDb();
             <?php if (isset($_POST['thide'])) {$showTlist = false; } ?>
 
             <?php if ($showTlist):
-                    $teamListCommand = "SELECT id, brand_name, points, money_spent, nationality, titles FROM team ORDER BY brand_name";
+                    $teamListCommand = "SELECT id, brand_name, points, money_spent, nationality, titles FROM team";
+                    if (isset($_POST['t_search'])) {
+                        $teamListCommand = $teamListCommand . sprintf(" WHERE LOWER(brand_name) LIKE '%%%s%%'", mysqli_real_escape_string($joinsql, strtolower($_POST['tns'])));
+                    }
                     $teamList = mysqli_query($joinsql, $teamListCommand) or die(mysqli_error($joinsql)); 
                 ?>
                 <div class="table-wrapper">

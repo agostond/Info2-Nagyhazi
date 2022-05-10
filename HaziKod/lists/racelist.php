@@ -4,10 +4,19 @@ $joinsql = getDb();
 ?>
 <html>
     <body>
+        <br>
+        --------------------
         <?php $showRlist = false; $editRace = false; ?>
-
-            <form  method = "post">
-                <input type = "submit" name = "rshow" value = "Versenyek mutatása" class="button button2"/>
+            <form  method = "post" autocomplete="off">
+                <?php 
+                    if(!isset($_POST['rns'])){
+                        $_POST['rns'] = "";
+                    } 
+                ?>
+                Keresés: 
+                <input type="search" name="rns" value = "<?=$_POST['rns']?>" placeholder="Verseny helyére"/>
+                <input type="submit" name = "r_search" value="Keres" class="button button2"/>
+                <input type = "submit" name = "rshow" value = "Összes verseny mutatása" class="button button2"/>
                 Szeretne adatokat szerkeszteni?
                 <input type="radio" id ="igen" name="redit" value= 1>
                 <label for="igen">Igen</label>
@@ -15,7 +24,7 @@ $joinsql = getDb();
                 <label for="nem">Nem</label>
             </form>
             <?php 
-                if (isset($_POST['rshow'])) {
+                if (isset($_POST['rshow']) || isset($_POST['r_search'])) {
                     $showRlist = true;
                     $editRace = $_POST['redit'];
                 } 
@@ -29,8 +38,11 @@ $joinsql = getDb();
             <?php if (isset($_POST['rhide'])) {$showRlist = false; } ?>
 
                 <?php if ($showRlist):
-                    $raceListCommand = "SELECT id, country, length, turns, race_date, IFNULL(best_laptime, '---') best_laptime, IFNULL(best_laptime_driver, 'Ismeretlen') best_laptime_driver FROM race ORDER BY country";
-                    $raceList = mysqli_query($joinsql, $raceListCommand) or die(mysqli_error($joinsql)); 
+                    $raceListCommand = "SELECT id, country, length, turns, race_date, IFNULL(best_laptime, '---') best_laptime, IFNULL(best_laptime_driver, 'Ismeretlen') best_laptime_driver FROM race";
+                    if (isset($_POST['r_search'])) {
+                        $raceListCommand = $raceListCommand . sprintf(" WHERE LOWER(country) LIKE '%%%s%%'", mysqli_real_escape_string($joinsql, strtolower($_POST['rns'])));
+                    }
+                    $raceList = mysqli_query($joinsql, $raceListCommand) or die(mysqli_error($joinsql));
                 ?>
                 <div class="table-wrapper">
                     <table class="fl-table">

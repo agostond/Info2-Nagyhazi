@@ -4,10 +4,22 @@ $joinsql = getDb();
 ?>
 <html>
     <body>
-        <?php $showPlist = false; $editPilot = false; ?>
-
-            <form  method = "post">
-                <input type = "submit" name = "pshow" value = "Pilóták mutatása" class="button button2"/>
+        <?php
+            $showPlist = false;
+            $editPilot = false;
+        ?>
+            <br>
+            --------------------
+            <form  method = "post" autocomplete="off">
+                <?php 
+                    if(!isset($_POST['pns'])){
+                        $_POST['pns'] = "";
+                    } 
+                ?>
+                Keresés: 
+                <input type="search" name="pns" value = "<?=$_POST['pns']?>" placeholder="Pilóta névre"/>
+                <input type="submit" name = "p_search" value="Keres" class="button button2"/>
+                <input type = "submit" name = "pshow" value = "Összes pilóta mutatása" class="button button2"/>
                 Szeretne adatokat szerkeszteni?
                 <input type="radio" id ="igen" name="pedit" value= 1>
                 <label for="igen">Igen</label>
@@ -15,7 +27,7 @@ $joinsql = getDb();
                 <label for="nem">Nem</label>
             </form>
             <?php 
-                if (isset($_POST['pshow'])) {
+                if (isset($_POST['pshow']) || isset($_POST['p_search'])) {
                     $showPlist = true;
                     $editPilot = $_POST['pedit'];
                 } 
@@ -27,8 +39,11 @@ $joinsql = getDb();
             <?php if (isset($_POST['phide'])) {$showRlist = false; } ?>
 
             <?php if ($showPlist):
-                    $pilotListCommand = "SELECT id, pilot_name, nationality, birth_date, carnumber, points, wins, podiums, titles FROM pilot GROUP BY pilot_name";
-                    $pilotList = mysqli_query($joinsql, $pilotListCommand) or die(mysqli_error($joinsql)); 
+                    $pilotListCommand = "SELECT id, pilot_name, nationality, birth_date, carnumber, points, wins, podiums, titles FROM pilot";
+                    if (isset($_POST['p_search'])) {
+                        $pilotListCommand = $pilotListCommand . sprintf(" WHERE LOWER(pilot_name) LIKE '%%%s%%'", mysqli_real_escape_string($joinsql, strtolower($_POST['pns'])));
+                    }
+                    $pilotList = mysqli_query($joinsql, $pilotListCommand) or die(mysqli_error($joinsql));
                 ?>
                 <div class="table-wrapper">
                     <table class="fl-table">

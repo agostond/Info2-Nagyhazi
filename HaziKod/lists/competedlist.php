@@ -5,9 +5,24 @@ $joinsql = getDb();
 <html>
     <body>
         <?php $showClist = false; $editCompeted = false; ?>
-
+            <br>
+            --------------------
             <form  method = "post">
-                <input type = "submit" name = "cshow" value = "Versenyeredmények mutatása" class="button button2"/>
+                <?php 
+                    if(!isset($_POST['cs'])){
+                        $_POST['cs'] = "";
+                    } 
+                ?> 
+                <div class="select"> 
+                    <select name = 'searchtype'>
+                        <option value='pilot_name'>Pilóta nevére</option>
+                        <option value='country'>Verseny helyére</option>
+                        <option value='race_date'>Verseny időpontjára</option>
+                    </select> 
+                </div>
+                <input type="search" name="cs" value = "<?=$_POST['cs']?>" placeholder="Keresés..."/>
+                <input type="submit" name = "c_search" value="Keres" class="button button2"/>
+                <input type = "submit" name = "cshow" value = "Összes versenyeredmény mutatása" class="button button2"/>
                 Szeretne adatokat szerkeszteni?
                 <input type="radio" id ="igen" name="cedit" value= 1>
                 <label for="igen">Igen</label>
@@ -16,7 +31,7 @@ $joinsql = getDb();
             </form>
             
             <?php 
-                if (isset($_POST['cshow'])) {
+                if (isset($_POST['cshow']) || isset($_POST['c_search'])) {
                     $showClist = true;
                     $editCompeted = $_POST['cedit'];
                 } 
@@ -33,7 +48,11 @@ $joinsql = getDb();
             <?php if (isset($_POST['chide'])) {$showClist = false; } ?>
 
             <?php if ($showClist):
-                    $competedListCommand = "SELECT id, pilot_id, race_id, start_position, finish_position FROM competed ORDER BY race_id";
+                    $competedListCommand = "SELECT competed.id as cid, pilot_id, race_id, start_position, finish_position, pilot_name, country, race_date FROM competed INNER JOIN pilot ON pilot.id = pilot_id INNER JOIN race ON race.id = race_id";
+                    if (isset($_POST['c_search'])) {
+                        $st = $_POST['searchtype'];
+                        $competedListCommand = $competedListCommand . sprintf(" WHERE LOWER($st) LIKE '%%%s%%'", mysqli_real_escape_string($joinsql, strtolower($_POST['cs'])));
+                    }
                     $competedList = mysqli_query($joinsql, $competedListCommand) or die(mysqli_error($joinsql)); 
                 ?>
                 <div class="table-wrapper">
@@ -96,7 +115,7 @@ $joinsql = getDb();
                             ?>
                             <tr>
                                 <form method = "post" autocomplete="off">
-                                    <input type="hidden" name="cid" value= <?=$row['id']?>>
+                                    <input type="hidden" name="cid" value= <?=$row['cid']?>>
                                     <td> 
                                         <div class="select"> 
                                         <select name = 'pilot_id'>

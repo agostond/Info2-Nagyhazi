@@ -121,8 +121,8 @@
                                 <td align="center">
                                     Legjobb köridő: <input type = "time" step=".001" name = "blaptime"/>
                                 </td>
-                                <td align="right">Rekord tartó: </td>
-                                <td align="left">
+                                <td align="center">
+                                    Rekord tartó:
                                     <input type="text" list="rp" name = "recdriver"/>
                                     <datalist id="rp"> 
                                         <option>Ismeretlen</option>
@@ -135,8 +135,6 @@
                                         <?php endwhile; ?>
                                     </datalist>
                                 </td align="center">
-                            </tr>
-                            <tr>
                                 <td align="center"> <input type = "submit" name = "newrace" value = "Létrehoz" class="button button2"/> </td>
                             </tr>
                         </form>

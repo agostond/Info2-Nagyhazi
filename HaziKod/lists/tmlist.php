@@ -3,11 +3,26 @@
 $joinsql = getDb();
 ?>
 <html>
+    <br>
+    --------------------
     <body>
         <?php $showMlist = false; $editMembership = false; ?>
 
             <form  method = "post">
-                <input type = "submit" name = "mshow" value = "Szerződések mutatása" class="button button2"/>
+                <?php 
+                    if(!isset($_POST['ts'])){
+                        $_POST['ts'] = "";
+                    } 
+                ?> 
+                <div class="select"> 
+                    <select name = 'tsearchtype'>
+                        <option value='pilot_name'>Pilóta nevére</option>
+                        <option value='brand_name'>Csapat nevére</option>
+                    </select> 
+                </div>
+                <input type="search" name="ts" value = "<?=$_POST['ts']?>" placeholder="Keresés..."/>
+                <input type="submit" name = "t_search" value="Keres" class="button button2"/>
+                <input type = "submit" name = "mshow" value = "Összes szerződés mutatása" class="button button2"/>
                 Szeretne adatokat szerkeszteni?
                 <input type="radio" id ="igen" name="medit" value= 1>
                 <label for="igen">Igen</label>
@@ -15,7 +30,7 @@ $joinsql = getDb();
                 <label for="nem">Nem</label>
             </form>
             <?php 
-                if (isset($_POST['mshow'])) {
+                if (isset($_POST['mshow']) || isset($_POST['t_search'])) {
                     $showMlist = true;
                     $editMembership = $_POST['medit'];
                 } 
@@ -32,7 +47,11 @@ $joinsql = getDb();
             <?php if (isset($_POST['mhide'])) {$showMlist = false; } ?>
 
             <?php if ($showMlist):
-                    $membershipListCommand = "SELECT id, pilot_id, team_id, contract_started, contract_expired FROM team_member ORDER BY pilot_id";
+                    $membershipListCommand = "SELECT team_member.id as tid, pilot_id, team_id, contract_started, contract_expired FROM team_member INNER JOIN pilot ON pilot.id = pilot_id INNER JOIN team ON team.id = team_id";
+                    if (isset($_POST['t_search'])) {
+                        $st = $_POST['tsearchtype'];
+                        $membershipListCommand = $membershipListCommand . sprintf(" WHERE LOWER($st) LIKE '%%%s%%'", mysqli_real_escape_string($joinsql, strtolower($_POST['ts'])));
+                    }
                     $membershipList = mysqli_query($joinsql, $membershipListCommand) or die(mysqli_error($joinsql)); 
                 ?>
                 <div class="table-wrapper">
@@ -91,7 +110,7 @@ $joinsql = getDb();
                             ?>
                             <tr>
                                 <form method = "post" autocomplete="off">
-                                    <input type="hidden" name="mid" value= <?=$row['id']?>>
+                                    <input type="hidden" name="mid" value= <?=$row['tid']?>>
                                     <td> 
                                         <div class="select"> 
                                         <select name = 'pilot_id'>

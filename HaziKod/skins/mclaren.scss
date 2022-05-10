@@ -92,6 +92,15 @@ input[type=text] {
     background-color: #ffae00;
     color: rgb(0, 0, 0);
   }
+
+  input[type=search] {
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: none;
+    background-color: #ffae00;
+    color: rgb(0, 0, 0);
+  }
   
   input[type=number] {
     padding: 12px 20px;
